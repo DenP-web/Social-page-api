@@ -1,10 +1,10 @@
 const fs = require("fs");
-const { createErrorResponse } = require("../utils/createError");
+const { createErrorResponse, errorMessages } = require("../utils");
 const { prisma } = require("../prisma/prisma-client");
 const jdenticon = require("jdenticon");
 const bcrypt = require("bcrypt");
 const path = require("path");
-const errorMessages = require("../utils/errorMessages");
+
 const jwt = require("jsonwebtoken");
 
 const UserController = {
@@ -75,7 +75,7 @@ const UserController = {
       });
 
       if (!user) {
-        return createErrorResponse(res, 404, errorMessages.userNotFound);
+        return createErrorResponse(res, 404, errorMessages.notFound("User"));
       }
       res.status(200).json(user);
     } catch (error) {
@@ -92,7 +92,7 @@ const UserController = {
         include: { followers: true, following: true },
       });
       if (!user) {
-        return createErrorResponse(res, 404, errorMessages.userNotFound);
+        return createErrorResponse(res, 404, errorMessages.notFound("User"));
       }
 
       const isFollowing = await prisma.follows.findFirst({
