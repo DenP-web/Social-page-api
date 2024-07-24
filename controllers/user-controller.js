@@ -2,7 +2,7 @@ const fs = require("fs");
 const { createErrorResponse, errorMessages } = require("../utils");
 const { prisma } = require("../prisma/prisma-client");
 const jdenticon = require("jdenticon");
-const bcrypt = require("bcrypt");
+const bcrypt = require('bcryptjs');
 const path = require("path");
 
 const jwt = require("jsonwebtoken");

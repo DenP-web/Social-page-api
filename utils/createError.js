@@ -1,6 +1,3 @@
-
-
-
 const createErrorResponse = (res, status, message) => {
   return res.status(status).json({
     status: status,
@@ -9,12 +6,7 @@ const createErrorResponse = (res, status, message) => {
   });
 };
 
-/**
- * Returns a string representation of the error type based on status code.
- * 
- * @param {number} status - The HTTP status code.
- * @returns {string} - The error type.
- */
+
 const getErrorType = (status) => {
   switch (status) {
     case 400:
