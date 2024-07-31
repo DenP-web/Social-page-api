@@ -4,8 +4,8 @@ const { prisma } = require("../prisma/prisma-client");
 const FollowController = {
   create: async (req, res) => {
     const userId = req.user.userId;
-    const followingId = req.params;
-    if (!followerId || !followingId || userId === followingId) {
+    const { followingId } = req.body;
+    if (!userId || !followingId || userId === followingId) {
       return createErrorResponse(res, 404, errorMessages.somethingWentWrong);
     }
     try {
@@ -16,7 +16,7 @@ const FollowController = {
         return createErrorResponse(res, 400, errorMessages.somethingWentWrong);
       }
       const follow = await prisma.follows.create({
-        data: { followerId, followingId },
+        data: { followerId: userId, followingId },
       });
       res.status(200).json(follow);
     } catch (error) {
@@ -25,9 +25,11 @@ const FollowController = {
     }
   },
   delete: async (req, res) => {
-    const { followingId } = req.body;
+    const followingId = req.params.id;
     const userId = req.user.userId;
-
+    if(!followingId) {
+      return createErrorResponse(res, 400, errorMessages.somethingWentWrong)
+    }
     try {
       const follow = await prisma.follows.findFirst({
         where: { AND: [{ followingId, followerId: userId }] },

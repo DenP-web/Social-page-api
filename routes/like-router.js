@@ -6,3 +6,5 @@ const likeRouter = Router();
 
 likeRouter.post("/", authCheck, LikeController.create);
 likeRouter.delete("/:id", authCheck, LikeController.delete);
+
+module.exports = likeRouter

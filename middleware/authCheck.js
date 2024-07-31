@@ -14,6 +14,10 @@ const authCheck = (req, res, next) => {
   const authHeader = req.headers.authorization;
   const token = authHeader ? authHeader.split(" ")[1] : null;
 
+  if (req.path === "/" && req.method === "GET" && !token) {
+    return next();
+  }
+
   // Check if the token is missing
   if (!token) {
     return createErrorResponse(res, 401, errorMessages.missingToken);

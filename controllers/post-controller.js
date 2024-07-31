@@ -25,13 +25,13 @@ const PostController = {
     }
   },
   getAll: async (req, res) => {
-    const userId = req.user.userId;
+    let userId = req.user ? req.user.userId : null;
     try {
       const posts = await prisma.post.findMany({
         include: { likes: true, author: true, comments: true },
         orderBy: { createAt: "desc" },
       });
-      const transformedPosts = indicateLike(posts, userId);
+      const transformedPosts = indicateLike(posts, userId)
 
       res.status(200).json({ posts: transformedPosts });
     } catch (error) {
@@ -59,7 +59,7 @@ const PostController = {
 
       const indicateLike = {
         ...post,
-        likedByUser: post.likes.map((like) => like.userId === userId),
+        likedByUser: post.likes.some((like) => like.userId === userId),
       };
       res.status(200).json({ post: indicateLike });
     } catch (error) {

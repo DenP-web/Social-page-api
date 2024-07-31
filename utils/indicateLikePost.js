@@ -1,4 +1,4 @@
-const indicateLike = (posts = [], userId) => {
+const indicateLike = (posts = [], userId = '') => {
   return posts.map((post) => ({
     ...post,
     likedByUser: post.likes.some((like) => like.userId === userId),

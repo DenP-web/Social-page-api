@@ -89,7 +89,7 @@ const UserController = {
     try {
       const user = await prisma.user.findUnique({
         where: { id },
-        include: { followers: true, following: true },
+        include: { followers: {include: {follower: true}}, following: {include: {following: true}} },
       });
       if (!user) {
         return createErrorResponse(res, 404, errorMessages.notFound("User"));

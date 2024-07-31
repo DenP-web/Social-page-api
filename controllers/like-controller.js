@@ -10,8 +10,8 @@ const LikeController = {
     }
 
     try {
-      const existingLike = await prisma.like.findUnique({
-        where: { userId, postId },
+      const existingLike = await prisma.like.findFirst({
+        where: { postId: postId, userId },
       });
       if (existingLike) {
         return createErrorResponse(res, 400, errorMessages.alreadyLiked);

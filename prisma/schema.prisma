@@ -29,6 +29,7 @@ model User {
   comments    Comment[]
   followers   Follows[] @relation("following")
   following   Follows[] @relation("follower")
+  role        String    @default("USER")
 }
 
 model Follows {

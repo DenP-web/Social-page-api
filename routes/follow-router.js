@@ -5,3 +5,5 @@ const { FollowController } = require("../controllers");
 
 followRouter.post("/", authCheck, FollowController.create);
 followRouter.delete("/:id", authCheck, FollowController.delete);
+
+module.exports = followRouter;
