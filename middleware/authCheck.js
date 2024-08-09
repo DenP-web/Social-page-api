@@ -11,9 +11,7 @@ const jwt = require("jsonwebtoken");
  * @returns {Object} - JSON error response or proceeds to the next middleware.
  */
 const authCheck = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  const token = authHeader ? authHeader.split(" ")[1] : null;
-
+  const token = req.cookies.token;
   if (req.path === "/" && req.method === "GET" && !token) {
     return next();
   }

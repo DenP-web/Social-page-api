@@ -15,6 +15,7 @@ datasource db {
 
 model User {
   id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  role        String    @default("USER")
   email       String    @unique
   password    String
   name        String
@@ -29,7 +30,9 @@ model User {
   comments    Comment[]
   followers   Follows[] @relation("following")
   following   Follows[] @relation("follower")
-  role        String    @default("USER")
+
+  conversationIDs String[]       @db.ObjectId
+  conversations   Conversation[] @relation(fields: [conversationIDs], references: [id])
 }
 
 model Follows {
@@ -65,4 +68,27 @@ model Comment {
   userId  String @db.ObjectId
   post    Post   @relation(fields: [postId], references: [id])
   postId  String @db.ObjectId
+}
+
+model Message {
+  id         String @id @default(auto()) @map("_id") @db.ObjectId
+  senderId   String @db.ObjectId
+  receiverId String @db.ObjectId
+
+  message   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  conversationId String       @db.ObjectId
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+}
+
+model Conversation {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  messages  Message[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  participantsIDs String[] @db.ObjectId
+  participants    User[]   @relation(fields: [participantsIDs], references: [id])
 }

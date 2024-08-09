@@ -2,10 +2,10 @@ const fs = require("fs");
 const { createErrorResponse, errorMessages } = require("../utils");
 const { prisma } = require("../prisma/prisma-client");
 const jdenticon = require("jdenticon");
-const bcrypt = require('bcryptjs');
+const bcrypt = require("bcryptjs");
 const path = require("path");
 
-const jwt = require("jsonwebtoken");
+const generateTokenAndSendCookies = require("../utils/generateToken");
 
 const UserController = {
   register: async (req, res) => {
@@ -33,35 +33,50 @@ const UserController = {
           name,
           avatarUrl: `/uploads/${avatarName}`,
         },
+        include: {
+          followers: { include: { follower: true } },
+          following: { include: { following: true } },
+        },
       });
-
-      res.status(200).json({ user });
+      generateTokenAndSendCookies(user.id, res);
+      delete user.password
+      res.status(201).json(user);
     } catch (error) {
       console.error({ error: `Error in registration: ${error.message}` });
       createErrorResponse(res, 500, errorMessages.requestCrashed);
     }
   },
+
   login: async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
       return createErrorResponse(res, 400, errorMessages.emptyFields);
     }
     try {
-      const user = await prisma.user.findUnique({ where: { email } });
+      let user = await prisma.user.findUnique({
+        where: { email },
+        include: {
+          followers: { include: { follower: true } },
+          following: { include: { following: true } },
+        },
+      });
       if (!user) {
         return createErrorResponse(res, 401, errorMessages.loginError);
       }
       const valid = await bcrypt.compare(password, user.password);
+      console.log(valid)
       if (!valid) {
         return createErrorResponse(res, 401, errorMessages.loginError);
       }
-      const token = jwt.sign({ userId: user.id }, process.env.SECRET_KEY);
-      res.status(200).json({ token });
+      generateTokenAndSendCookies(user.id, res);
+      delete user.password
+      res.status(200).json(user);
     } catch (error) {
       console.error({ error: `Error in login: ${error.message}` });
       createErrorResponse(res, 500, errorMessages.requestCrashed);
     }
   },
+
   current: async (req, res) => {
     try {
       const user = await prisma.user.findUnique({
@@ -77,19 +92,24 @@ const UserController = {
       if (!user) {
         return createErrorResponse(res, 404, errorMessages.notFound("User"));
       }
+      delete user.password
       res.status(200).json(user);
     } catch (error) {
       console.error(`Error in get current user ${error.message}`);
       createErrorResponse(res, 500, errorMessages.requestCrashed);
     }
   },
+
   getUserById: async (req, res) => {
     const { id } = req.params;
     const userId = req.user.userId;
     try {
       const user = await prisma.user.findUnique({
         where: { id },
-        include: { followers: {include: {follower: true}}, following: {include: {following: true}} },
+        include: {
+          followers: { include: { follower: true } },
+          following: { include: { following: true } },
+        },
       });
       if (!user) {
         return createErrorResponse(res, 404, errorMessages.notFound("User"));
@@ -130,6 +150,7 @@ const UserController = {
           email: email || undefined,
           name: name || undefined,
           bio: bio || undefined,
+          avatarUrl: filePath ? `/${filePath}` : undefined,
           dateOfBirth: dateOfBirth || undefined,
           location: location || undefined,
         },
