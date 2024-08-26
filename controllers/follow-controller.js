@@ -1,5 +1,6 @@
 const { createErrorResponse, errorMessages } = require("../utils");
 const { prisma } = require("../prisma/prisma-client");
+const { getReceiverSocketId, io } = require("../socket/socket");
 
 const FollowController = {
   create: async (req, res) => {
@@ -17,7 +18,14 @@ const FollowController = {
       }
       const follow = await prisma.follows.create({
         data: { followerId: userId, followingId },
+        include: {follower: true}
       });
+
+      const receiverSocketId = getReceiverSocketId(followingId);
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit("newFollower", follow);
+      }
+
       res.status(200).json(follow);
     } catch (error) {
       console.error(`Error with create follow: ${error.message}`);
@@ -27,8 +35,8 @@ const FollowController = {
   delete: async (req, res) => {
     const followingId = req.params.id;
     const userId = req.user.userId;
-    if(!followingId) {
-      return createErrorResponse(res, 400, errorMessages.somethingWentWrong)
+    if (!followingId) {
+      return createErrorResponse(res, 400, errorMessages.somethingWentWrong);
     }
     try {
       const follow = await prisma.follows.findFirst({

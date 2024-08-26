@@ -22,6 +22,7 @@ const UserController = {
       }
       const generatedAvatar = jdenticon.toPng(`${name}${Date.now()}`, 200);
       const hashedPassed = await bcrypt.hash(password, 10);
+      
       const avatarName = `${name}_${Date.now()}.png`;
       const avatarPath = path.join(__dirname, "/../uploads", avatarName);
       fs.writeFileSync(avatarPath, generatedAvatar);
@@ -39,7 +40,7 @@ const UserController = {
         },
       });
       generateTokenAndSendCookies(user.id, res);
-      delete user.password
+      delete user.password;
       res.status(201).json(user);
     } catch (error) {
       console.error({ error: `Error in registration: ${error.message}` });
@@ -64,12 +65,12 @@ const UserController = {
         return createErrorResponse(res, 401, errorMessages.loginError);
       }
       const valid = await bcrypt.compare(password, user.password);
-      console.log(valid)
+      console.log(valid);
       if (!valid) {
         return createErrorResponse(res, 401, errorMessages.loginError);
       }
       generateTokenAndSendCookies(user.id, res);
-      delete user.password
+      delete user.password;
       res.status(200).json(user);
     } catch (error) {
       console.error({ error: `Error in login: ${error.message}` });
@@ -92,7 +93,7 @@ const UserController = {
       if (!user) {
         return createErrorResponse(res, 404, errorMessages.notFound("User"));
       }
-      delete user.password
+      delete user.password;
       res.status(200).json(user);
     } catch (error) {
       console.error(`Error in get current user ${error.message}`);
@@ -124,6 +125,7 @@ const UserController = {
       createErrorResponse(res, 500, errorMessages.requestCrashed);
     }
   },
+
   updateUser: async (req, res) => {
     const { id } = req.params;
     const { email, bio, name, dateOfBirth, location } = req.body;
@@ -159,6 +161,16 @@ const UserController = {
     } catch (error) {
       console.error(`Error in update user: ${error.message}`);
       createErrorResponse(res, 500, errorMessages.requestCrashed);
+    }
+  },
+
+  logout: async (req, res) => {
+    try {
+      res.cookie("token", "", { maxAge: 0 });
+      res.status(200).json({ message: "Logged out successfully" });
+    } catch (error) {
+      console.error(`Error in logout controller: ${error.message}`);
+      res.status(500).json({ error: "Internal Server Error" });
     }
   },
 };

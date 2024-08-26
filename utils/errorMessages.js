@@ -8,6 +8,7 @@ const errorMessages = {
   noAccess: "Sorry, you haven't access",
   usedEmail: "Sorry, this email is already in use",
   alreadyLiked: "This post already liked",
+  alreadyLeavedConversation: "You already leave this conversation",
   somethingWentWrong: 'Sorry, something went wrong, try later',
   notFollowing: "You aren't follow this user",
   notFound: (something) => `${something} not found`,
